@@ -67,7 +67,7 @@ export interface FFlagOptions {
      * @default 30000
      */
     dynamicRefreshRate?: number
-    flags: FFlagList;
+    // flags: FFlagList;
 }
 export default class FFlagsCollection<
     fastFlags = any,
