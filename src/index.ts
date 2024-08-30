@@ -104,15 +104,13 @@ export default class FFlagsCollection<
             filter: () => false,
             logger: (_a, _b, _c) => false
         } as FFlagOptions, options);
+        const [ dbname, collname ] = options.collection.split('/');
+
+        this.refreshRate = options.dynamicRefreshRate!;
         this.filter = options.filter;
         this.database = options.database
-        if (this.database instanceof MongoClient) {
-            const [ dbname, collname ] = options.collection.split('/');
-            this.db_name = dbname;
-            this.collection = collname;
-        } else {
-            this.collection = options.collection;
-        }
+        this.db_name = dbname;
+        this.collection = collname;
         this.intervalFunc = () => this.updateDynamicCache().catch(() => false);
         this.interval = setInterval(() => {
             if (!this.isUpdated) return;
@@ -122,11 +120,14 @@ export default class FFlagsCollection<
         if (options.dynamicRefreshRate) {
             // @ts-ignore
             this.on('DynamicFFlagRefreshRate', value => {
-                if (value !== this.refreshRate) {
-                    const cached = this.refreshRate;
-                    this.resetInterval(value);
-                    this.logger!(FFlagEnum.REFRESH_CHANGE, 'CHANGE REFRESH RATE', { current: value, cached: cached });
-                    // Logger.info(`Changed FFlag refresh rate.`);
+                if (value == this.refreshRate) return;
+                const cached = this.refreshRate;
+                this.resetInterval(value);
+                if (this.logger) {
+                    this.logger(FFlagEnum.REFRESH_CHANGE, 'CHANGE REFRESH RATE', {
+                        current: value,
+                        cached: cached
+                    });
                 }
             });
         }
@@ -148,8 +149,7 @@ export default class FFlagsCollection<
      */
     async updateFastCache(): Promise<void> {
         if (this.isUpdated) return Promise.resolve();
-        return new Promise(async (resolve, reject) => {
-
+        return new Promise(async (resolve) => {
             const filterResult = this.filter!();
             let query = { type: 'fast' }
             if (filterResult !== false) {
@@ -164,7 +164,7 @@ export default class FFlagsCollection<
         });
     }
     async updateDynamicCache(): Promise<void> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             const filterResult = this.filter!();
             let query = { type: 'dynamic' }
             if (filterResult !== false) {
@@ -172,7 +172,7 @@ export default class FFlagsCollection<
             }
             const cache = await this.database.db(this.db_name).collection(this.collection).find<FFlag>(query).toArray();
             cache.forEach(flag => {
-                const oldValue = this.cache.get(`dynamic:${flag._id}` as `dynamic:${string}`) as FFlag['value'];
+                const oldValue = this.cache.get(`dynamic:${flag._id}`) as FFlag['value'];
                 this.cache.set(`dynamic:${flag._id}`, flag.value);
                 if (oldValue !== undefined) {
                     if (Array.isArray(flag.value)) {
