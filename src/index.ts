@@ -69,7 +69,7 @@ export interface FFlagOptions {
     dynamicRefreshRate?: number
     // flags: FFlagList;
 }
-export default class FFlagsCollection<
+export default class FFlagManager<
     fastFlags = any,
     dynamicFlags = any,
     DynamicEventTypes extends EventEmitter.ValidEventTypes = {}
