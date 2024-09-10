@@ -5,8 +5,7 @@
  *  indication of whatever copyright the file is subject to.
  *--------------------------------------------------------------------------------------------*/
 
-import { MongoClient } from 'mongodb';
-import Redis from 'ioredis';
+import { Collection } from 'mongodb';
 import EventEmitter from 'eventemitter3';
 
 // todo: Implement watch stream implementation!
@@ -38,15 +37,7 @@ export interface FFlagList {
 // also updtae refreshRate. set base to 30s.
 
 export interface FFlagOptions {
-    /** The database to use */
-    database: MongoClient;
-    /**
-     * The database collection to fetch FFlag results for.
-     * - MongoDB users (format: database_name/collection)
-     *  - example: 'service_name/fflags'
-     * For MongoDB, a `find({})` query will be executed.
-     */
-    collection: string;
+    collection: Collection;
     /**
      * A function to determine if extra data should be transmitted to the MongoDB search query. (Object.assign() to a dictionary)
      * 
@@ -75,13 +66,11 @@ export default class FFlagManager<
     DynamicEventTypes extends EventEmitter.ValidEventTypes = {}
 > extends EventEmitter <DynamicEventTypes> {
     private cache: Map<`${'fast'|'dynamic'}:${string}`, any> = new Map();
-    private database: FFlagOptions['database'];
+    // private database: FFlagOptions['database'];
     private filter!: FFlagOptions['filter'];
     private logger!: FFlagOptions['logger'];
-    private collection: string;
-    private db_name?: string;
+    private collection: Collection;
     private isUpdated: boolean = false;
-    private refreshRateObtained: boolean = false;
     private refreshRate: number = 30000;
     private interval!: NodeJS.Timeout;
     private intervalFunc!: Function;
@@ -104,13 +93,10 @@ export default class FFlagManager<
             filter: () => false,
             logger: (_a, _b, _c) => false
         } as FFlagOptions, options);
-        const [ dbname, collname ] = options.collection.split('/');
 
         this.refreshRate = options.dynamicRefreshRate!;
         this.filter = options.filter;
-        this.database = options.database
-        this.db_name = dbname;
-        this.collection = collname;
+        this.collection = options.collection;
         this.intervalFunc = () => this.updateDynamicCache().catch(() => false);
         this.interval = setInterval(() => {
             if (!this.isUpdated) return;
@@ -155,7 +141,7 @@ export default class FFlagManager<
             if (filterResult !== false) {
                 query = Object.assign(filterResult, { type: 'fast' });
             }
-            const cache = await this.database.db(this.db_name).collection(this.collection).find<FFlag>(query).toArray();
+            const cache = await this.collection.find<FFlag>(query).toArray();
             cache.forEach(flag => {
                 this.cache.set(`fast:${flag._id}`, flag.value);
             });
@@ -170,7 +156,7 @@ export default class FFlagManager<
             if (filterResult !== false) {
                 query = Object.assign(filterResult, { type: 'dynamic' });
             }
-            const cache = await this.database.db(this.db_name).collection(this.collection).find<FFlag>(query).toArray();
+            const cache = await this.collection.find<FFlag>(query).toArray();
             cache.forEach(flag => {
                 const oldValue = this.cache.get(`dynamic:${flag._id}`) as FFlag['value'];
                 this.cache.set(`dynamic:${flag._id}`, flag.value);
