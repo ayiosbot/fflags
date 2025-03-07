@@ -1,0 +1,19 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "out/src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@ayios/fflags": "^0.0.10",
+    "@types/node": "^22.13.9",
+    "dotenv": "^16.4.7",
+    "mongodb": "^6.14.2"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+      "declaration": true,
+      "target": "ESNext",
+      "module": "commonjs",
+      "rootDir": "./src/",
+      "outDir": "./out/src",
+      "strict": true,
+      "moduleResolution": "node",
+      "importHelpers": true,
+      "experimentalDecorators": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "allowSyntheticDefaultImports": true,
+      "resolveJsonModule": true,
+      "forceConsistentCasingInFileNames": true,
+      "removeComments": false,
+      "typeRoots": [
+          "node_modules/@types"
+      ],
+      "sourceMap": true,
+      // Set `sourceRoot` to  "/" to strip the build path prefix
+      // from generated source code references.
+      // This improves issue grouping in Sentry.
+      "sourceRoot": "/",
+      "inlineSources": true,
+      "baseUrl": "./"
+  },
+  "files": [
+      "src/index.ts"
+  ],
+  "include": [
+      "./**/*.ts",
+      "src/global.d.ts"
+  ],
+  "exclude": [
+      "node_modules",
+      "out"
+  ],
+}
