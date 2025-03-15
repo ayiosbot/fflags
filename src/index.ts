@@ -4,7 +4,6 @@
  *  code not created by Ayios is under their respective license, which should have an
  *  indication of whatever copyright the file is subject to.
  *--------------------------------------------------------------------------------------------*/
-
 import { Collection } from 'mongodb';
 import EventEmitter from 'eventemitter3';
 
