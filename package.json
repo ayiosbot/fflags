@@ -1,6 +1,6 @@
 {
   "name": "@ayios/fflags",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "",
   "main": "out/src/index.js",
   "keywords": [],
@@ -16,6 +16,6 @@
   },
   "dependencies": {
     "eventemitter3": "^5.0.1",
-    "mongodb": "^6.8.0"
+    "mongodb": "^6.16.0"
   }
 }
